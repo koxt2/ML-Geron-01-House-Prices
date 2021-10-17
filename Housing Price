@@ -270,8 +270,8 @@ lin_rmse = np.sqrt(lin_mse)
 # mean absolute error
 lin_mae = mean_absolute_error(housing_labels, housing_predictions)
 
-print(lin_rmse)
-print(lin_mae)
+print("Lin_RMSE", lin_rmse)
+print("Lin_MAE", lin_mae)
 
 ########## Tune using cross validation ##########
 def display_scores(scores):

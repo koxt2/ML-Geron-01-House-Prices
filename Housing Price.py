@@ -67,9 +67,21 @@ fetch_housing_data()
 
 ########## Summarise/analyse the data ##########
 housing = load_housing_data() 
+print("""
+
+Housing Data""")
 print(housing) # Prints the housing data
+print("""
+
+Housing Data Summary""")
 print(housing.info()) # Prints a summary of the housing data
+print("""
+
+Housing Data Tally for Ocean Proximty""")
 print(housing["ocean_proximity"].value_counts()) # Prints a count of values of one of the columns
+print("""
+
+Housing Data Averages""")
 print(housing.describe()) # Prints a collection of averages
 
 housing.hist(bins=50, figsize=(20,15)) # Creates a collection of histograms
@@ -82,6 +94,9 @@ housing["income_cat"] = pd.cut(housing["median_income"], # Group the coloumn dat
                                labels=[1, 2, 3, 4, 5])
 
 housing["income_cat"].hist()
+print("""
+
+Housing Data Tally for Income category""")
 print(housing["income_cat"].value_counts()) # Print the count of each income category
 
 split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
@@ -89,8 +104,12 @@ for train_index, test_index in split.split(housing, housing["income_cat"]):
     strat_train_set = housing.loc[train_index]
     strat_test_set = housing.loc[test_index]
 
-print(len(strat_train_set)) # Check that the sum of the two new datasets equal the number of the original set
-print(len(strat_test_set))
+print("""
+
+Check the sum of the train set and test set match the total set""")
+print("Train set total = ", len(strat_train_set)) # Check that the sum of the two new datasets equal the number of the original set
+print("Test set total  = ", len(strat_test_set))
+print("Base set total  = ", len(housing))
 
 ########## Compare stratified test set proportions to original sample ##########
 print(housing["income_cat"].value_counts() / len(housing)) # Original sample

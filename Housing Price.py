@@ -9,7 +9,7 @@ import pandas as pd
 from pandas.plotting import scatter_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -76,8 +76,8 @@ housing.hist(bins=50, figsize=(20,15)) # Creates a collection of histograms
 save_fig("attribute_histogram_plots")
 
 ########## Create a train set and test set (80/20) - stratify the sample based on median income ##########
-# Have a look at the data that is going to be the base of strat
-housing["income_cat"] = pd.cut(housing["median_income"], # Split the coloumn data into categories, ie 0-£15k, £15-30k etc
+# Have a look at the data that is going to be the base strata
+housing["income_cat"] = pd.cut(housing["median_income"], # Group the coloumn data into categories, ie 0-£15k, £15-30k etc
                                bins=[0., 1.5, 3.0, 4.5, 6., np.inf],
                                labels=[1, 2, 3, 4, 5])
 
@@ -89,14 +89,14 @@ for train_index, test_index in split.split(housing, housing["income_cat"]):
     strat_train_set = housing.loc[train_index]
     strat_test_set = housing.loc[test_index]
 
-print(len(strat_train_set))
+print(len(strat_train_set)) # Check that the sum of the two new datasets equal the number of the original set
 print(len(strat_test_set))
 
 ########## Compare stratified test set proportions to original sample ##########
 print(housing["income_cat"].value_counts() / len(housing)) # Original sample
 print(strat_test_set["income_cat"].value_counts() / len(strat_test_set)) # Test set
 
-########## Creates a table to compare proportions ##########
+########## Create a table to compare proportions ##########
 def income_cat_proportions(data):
     return data["income_cat"].value_counts() / len(data)
 
@@ -154,8 +154,7 @@ save_fig("california_housing_prices_plot")
 
 ########## Look for correlations ##########
 corr_matrix = housing.corr()
-corr_matrix["median_house_value"].sort_values(ascending=False)
-print(corr_matrix)
+print(corr_matrix["median_house_value"].sort_values(ascending=False))
 
 ########## Create scatter diagrams of the main attributes ##########
 attributes = ["median_house_value", "median_income", "total_rooms",
@@ -178,11 +177,11 @@ corr_matrix = housing.corr()
 print(corr_matrix["median_house_value"].sort_values(ascending=False))
 
 ########## Prepare data for machine learning algorithm ##########
-# Note; from earlier summary that total number of bedrooms only has a figure for 20433 samples from a total pool of 20640
 # Revert to a clean training set
-housing = strat_train_set.drop("median_house_value", axis=1) # drop labels for training set
-housing_labels = strat_train_set["median_house_value"].copy() # make a copy of the data
+housing = strat_train_set.drop("median_house_value", axis=1) # Makes a copy of strat_train_set but without median_house_value
+housing_labels = strat_train_set["median_house_value"].copy() # Copies just the median_house_value from strat_train_set
 
+# Note; from earlier summary that total number of bedrooms only has a figure for 20433 samples from a total pool of 20640
 # Use sklearn.impute to fill null rows with median
 imputer = SimpleImputer(strategy="median")
 housing_num = housing.drop("ocean_proximity", axis=1) # imputer only works on numerical data and 'ocean proximity' is text, so drop it. 
@@ -190,6 +189,7 @@ imputer.fit(housing_num) # Calculate the median and store the result
 
 # In case any new data has missing values use imputer to calculate the median of all the other columns
 imputer.statistics_
+
 housing_num.median().values # manually calculate the median to check imputer did it correctly... check the results are the same
 print(imputer.statistics_)
 print(housing_num.median().values)
@@ -197,12 +197,21 @@ print(housing_num.median().values)
 X = imputer.transform(housing_num) # add the calculated median (imputer.fit) to the data sample
 
 ########## Covert text data to numerical ##########
+# A look at the first 10 rows of the alpha data
 housing_cat = housing[["ocean_proximity"]]
+print(housing_cat.head(10))
+
+# First method - OrdinalEncoder
+ordinal_encoder = OrdinalEncoder()
+housing_cat_encoded = ordinal_encoder.fit_transform(housing_cat)
+print(housing_cat_encoded[:10]) # Print first 10 rows of encoded data
+print(ordinal_encoder.categories_) # Print a list of the categories
+# ML algorithms will assume two nearby values are more similar that two distant values
+
+# Second method - OneHotEncoder
 cat_encoder = OneHotEncoder()
 housing_cat_1hot = cat_encoder.fit_transform(housing_cat)
 housing_cat_1hot
-
-print(cat_encoder.categories_)
 
 ########## Create a custom transformer to add extra attributes ##########
 # column index

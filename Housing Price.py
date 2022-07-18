@@ -109,6 +109,7 @@ print("""
 Check the sum of the train set and test set match the total set""")
 print("Train set total = ", len(strat_train_set)) # Check that the sum of the two new datasets equal the number of the original set
 print("Test set total  = ", len(strat_test_set))
+print("Train set total + test set total = ", (len(strat_train_set)) + (len(strat_test_set)))
 print("Base set total  = ", len(housing))
 
 ########## Compare stratified test set proportions to original sample ##########
@@ -275,43 +276,55 @@ full_pipeline = ColumnTransformer([
 housing_prepared = full_pipeline.fit_transform(housing) # Apply transformations
 
 ########## LINEAR REGRESSION ##########   
+print("""
+
+
+**********     Linear Regression     **********""")
 
 lin_reg = LinearRegression()
-lin_reg.fit(housing_prepared, housing_labels)
+lin_reg.fit(housing_prepared, housing_labels) # Train the algorithm using LR on the transformed data and check against the labels
 
+# Try the trained algorithm out on 5 instances
 some_data = housing.iloc[:5]
 some_labels = housing_labels.iloc[:5]
 some_data_prepared = full_pipeline.transform(some_data)
 print("""
 
 
-**********     Linear Regression     **********""")
+**********     Linear Regression (test on 5 intances)     **********""")
 print("Predictions:", lin_reg.predict(some_data_prepared))
 print("Labels:", list(some_labels))
+# It is quite inaccurate
 
-########## Test the model against the whole test sample ##########
-# Result is the prediction error $
-housing_predictions = lin_reg.predict(housing_prepared)
-# Mean squared error
-lin_mse = mean_squared_error(housing_labels, housing_predictions)
-lin_rmse = np.sqrt(lin_mse)
+# Test the model against the whole train sample 
+housing_predictions = lin_reg.predict(housing_prepared) # Run LR model on the transformed training data
+lin_mse = mean_squared_error(housing_labels, housing_predictions) # Calculate the MSE
+lin_rmse = np.sqrt(lin_mse) # Calculate the RMSE
+print("""
+
+Testing the Linear Regression model on the whole training sample
+Linear Regression RMSE = $""",lin_rmse) # This is the +/- result in $
+# This is a typical underfit. Either choose more powerful model, train algorithm with better features or reduce constraints. 
+
 # mean absolute error
-lin_mae = mean_absolute_error(housing_labels, housing_predictions)
+# lin_mae = mean_absolute_error(housing_labels, housing_predictions)
+# print("Lin_MAE", lin_mae)
 
-print("Lin_RMSE", lin_rmse)
-print("Lin_MAE", lin_mae)
-
-########## Tune using cross validation ##########
+# Tune using cross validation 
+# K-fold cross-validation... Randomly split the train data into 10 folds. It will train and evaluate 10 times - using a different fold each time.
+# Result is an array of 10 evaluation scores. 
 def display_scores(scores):
-    print("Scores:", scores)
-    print("Mean:", scores.mean())
-    print("Standard deviation:", scores.std())
+    print("Scores:", scores) # Results of the predictions made using cross-validation
+    print("Mean:", scores.mean()) # Mean of these predictions
+    print("Standard deviation:", scores.std()) # Standard deviation of the scores
 
-lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels,
+lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels, # Perform cross-validation evaluation using MSE and 10 folds
                              scoring="neg_mean_squared_error", cv=10)
-lin_rmse_scores = np.sqrt(-lin_scores)
+lin_rmse_scores = np.sqrt(-lin_scores) # RMSE of the predictions
+print("""
 
-print(display_scores(lin_rmse_scores))
+Results of cross-validation evaluation for Linear Regression""")
+(display_scores(lin_rmse_scores))
 
 ########## DECISION TREE REGRESSOR ##########
 print("""
@@ -319,20 +332,29 @@ print("""
 
 **********     Decision Tree Regression     **********""")
 tree_reg = DecisionTreeRegressor(random_state=42)
-tree_reg.fit(housing_prepared, housing_labels)
+#tree_reg = DecisionTreeRegressor()
+tree_reg.fit(housing_prepared, housing_labels) # Train the algorithm using DTR on the transformed data and check against the labels
 
-housing_predictions = tree_reg.predict(housing_prepared)
-tree_mse = mean_squared_error(housing_labels, housing_predictions)
-tree_rmse = np.sqrt(tree_mse)
+housing_predictions = tree_reg.predict(housing_prepared) # Run DTR model on the transformed training data
+tree_mse = mean_squared_error(housing_labels, housing_predictions) # Calculate the MSE
+tree_rmse = np.sqrt(tree_mse) # Calculate the RMSE
+print("""
 
-print(tree_rmse)
+Testing the Decision Tree Regression model on the whole training sample
+Decision Tree Regression RMSE= $""", tree_rmse) # This is the +/- result in $
+# Result is $0... an overfit. Not good. 
 
 ########## Tune model using cross validation ##########
-scores = cross_val_score(tree_reg, housing_prepared, housing_labels,
-                         scoring="neg_mean_squared_error", cv=10)
-tree_rmse_scores = np.sqrt(-scores)
 
-print(display_scores(tree_rmse_scores))
+tree_scores = cross_val_score(tree_reg, housing_prepared, housing_labels, # Perform cross-validation evaluation using MSE and 10 folds
+                         scoring="neg_mean_squared_error", cv=10)
+tree_rmse_scores = np.sqrt(-tree_scores) # RMSE of the predictions
+print("""
+
+Results of cross-validation evaluation for Decision Tree Regression""")
+(display_scores(tree_rmse_scores))
+
+# Worse than the Linear Regression model
 
 ########## RANDOM FOREST REGRESSOR ##########
 print("""
@@ -340,55 +362,69 @@ print("""
 
 **********     Random Forest Regressor     **********""")
 forest_reg = RandomForestRegressor(n_estimators=100, random_state=42)
-forest_reg.fit(housing_prepared, housing_labels)
+forest_reg.fit(housing_prepared, housing_labels) # Train the algorithm using RFR on the transformed data and check against the labels
 
-housing_predictions = forest_reg.predict(housing_prepared)
-forest_mse = mean_squared_error(housing_labels, housing_predictions)
-forest_rmse = np.sqrt(forest_mse)
+housing_predictions = forest_reg.predict(housing_prepared) # Run RFR model on the transformed training data
+forest_mse = mean_squared_error(housing_labels, housing_predictions) # Calculate the MSE
+forest_rmse = np.sqrt(forest_mse) # Calculate the RMSE
 
-print(forest_rmse)
+print("""
+
+Testing the Random Forest Regression model on the whole training sample
+Random Forest Regressor RMSE = $""",forest_rmse)
 
 ########## Tune using cross validation ##########
-forest_scores = cross_val_score(forest_reg, housing_prepared, housing_labels,
+forest_scores = cross_val_score(forest_reg, housing_prepared, housing_labels, # Perform cross-validation evaluation using MSE and 10 folds
                                 scoring="neg_mean_squared_error", cv=10)
-forest_rmse_scores = np.sqrt(-forest_scores)
-print(display_scores(forest_rmse_scores))
+forest_rmse_scores = np.sqrt(-forest_scores) # RMSE of the predictions
+print("""
 
-########## Random forest regressor seems most accurate - fine tune further ##########
+Results of cross-validation evaluation for Random Forest Regression""")
+(display_scores(forest_rmse_scores))
+
+print("""
+
+
+########## Random forest regressor seems most accurate - fine tune further ##########""")
+
+
 # Use GridSearch to play with the hyperparameters
 param_grid = [
-    # try 12 (3×4) combinations of hyperparameters
-    {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
-    # then try 6 (2×3) combinations with bootstrap set as False
-    {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
+    {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]}, # try 12 (3×4) combinations of hyperparameters
+    {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]}, # then try 6 (2×3) combinations with bootstrap set as False
   ]
 
 forest_reg = RandomForestRegressor(random_state=42)
-# train across 5 folds, that's a total of (12+6)*5=90 rounds of training 
-grid_search = GridSearchCV(forest_reg, param_grid, cv=5,
+
+grid_search = GridSearchCV(forest_reg, param_grid, cv=5, # train across 5 folds, that's a total of (12+6)*5=90 rounds of training 
                            scoring='neg_mean_squared_error',
                            return_train_score=True)
 
-print(grid_search.fit(housing_prepared, housing_labels))
-print(grid_search.best_params_) # Prints the best hyperparameter combination
-print(grid_search.best_estimator_) # Also prints the best hyperparameter combination
+grid_search.fit(housing_prepared, housing_labels) # Train the algorithm using RFR on the transformed data and check against the labels
+print("Best hyperparameter combination", grid_search.best_params_) # Prints the best hyperparameter combination
+#print(grid_search.best_estimator_) # Also prints the best hyperparameter combination
 
-cvres = grid_search.cv_results_ # Print results
+print("""
+    
+List of the evaluation scores""")
+cvres = grid_search.cv_results_ # Print all evaluation scores
 for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
-    print(np.sqrt(-mean_score), params)
+    print((np.sqrt(-mean_score), params))
 
 ########## Evaluate final model on test set ##########
-final_model = grid_search.best_estimator_
+final_model = grid_search.best_estimator_ # Say that you want to use the best_esitmator from the grid search
 
-X_test = strat_test_set.drop("median_house_value", axis=1)
-y_test = strat_test_set["median_house_value"].copy()
+X_test = strat_test_set.drop("median_house_value", axis=1) # Make a copy of the test set but without the median_house_value
+y_test = strat_test_set["median_house_value"].copy() # Make a copy of the median_house_value data from the test set
 
-X_test_prepared = full_pipeline.transform(X_test)
-final_predictions = final_model.predict(X_test_prepared)
+X_test_prepared = full_pipeline.transform(X_test) # Transform the data in X_test
+final_predictions = final_model.predict(X_test_prepared) # Make predictions of the median_house_value based on the data in X_test_data
 
-final_mse = mean_squared_error(y_test, final_predictions)
+final_mse = mean_squared_error(y_test, final_predictions) # Compare the predicted results to the known median_house_value 
 final_rmse = np.sqrt(final_mse)
-print("Final Random Tree Regressor RMSE - ", final_rmse)
+print("""
+
+Final Random Tree Regressor RMSE = """, final_rmse) # Calculate the RMSE of the predictions
 
 print ("My program took", time.time() - start_time, "to run")
  

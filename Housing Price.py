@@ -27,8 +27,8 @@ import time
 ########## Setup ##########
 start_time = time.time()
 
-PROJECT_ID = "ML-Geron-02-House-Prices"
-PROJECT_ROOT_DIR = "Documents/Python/Machine Learning/" + PROJECT_ID
+#PROJECT_ID = "ML-Geron-02-House-Prices"
+PROJECT_ROOT_DIR = ""
 IMAGES_PATH = os.path.join(PROJECT_ROOT_DIR, "images")
 DATASET_PATH = os.path.join(PROJECT_ROOT_DIR, "data")
 
@@ -57,9 +57,9 @@ def fetch_data(data_url=DOWNLOAD_ADDRESS + DOWNLOAD_FILENAME, dataset_path=DATAS
     if not os.path.isdir(dataset_path):
         os.makedirs(dataset_path)
     # extract the tarball
-    tgz_path = os.path.join(dataset_path, DOWNLOAD_FILENAME)
-    urllib.request.urlretrieve(data_url, tgz_path)
-    data_tgz = tarfile.open(tgz_path)
+    downloaded_file = os.path.join(dataset_path, DOWNLOAD_FILENAME)
+    urllib.request.urlretrieve(data_url, downloaded_file)
+    data_tgz = tarfile.open(downloaded_file)
     data_tgz.extractall(path=dataset_path)
     data_tgz.close()
 

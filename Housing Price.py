@@ -27,7 +27,6 @@ import time
 ########## Setup ##########
 start_time = time.time()
 
-#PROJECT_ID = "ML-Geron-02-House-Prices"
 PROJECT_ROOT_DIR = ""
 IMAGES_PATH = os.path.join(PROJECT_ROOT_DIR, "images")
 DATASET_PATH = os.path.join(PROJECT_ROOT_DIR, "data")

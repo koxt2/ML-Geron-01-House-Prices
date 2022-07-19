@@ -27,17 +27,18 @@ import time
 ########## Setup ##########
 start_time = time.time()
 
-PROJECT_ROOT_DIR = ""
-CHAPTER_ID = "housing_price_model"
+PROJECT_ID = "ML-Geron-02-House-Prices"
+PROJECT_ROOT_DIR = "Documents/Python/Machine Learning/" + PROJECT_ID
 IMAGES_PATH = os.path.join(PROJECT_ROOT_DIR, "images")
-os.makedirs(IMAGES_PATH, exist_ok=True)
+DATASET_PATH = os.path.join(PROJECT_ROOT_DIR, "data")
 
-DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
-DATASET_PATH = PROJECT_ROOT_DIR + "dataset"
-DATA_URL = DOWNLOAD_ROOT + "datasets/housing/housing.tgz"
+DOWNLOAD_ADDRESS = "https://raw.githubusercontent.com/ageron/handson-ml2/master/datasets/housing/"
+DATA_FILENAME = "housing.tgz"
 
 # Where to save the figures 
-def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
+def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300, images_path=IMAGES_PATH):
+    if not os.path.isdir(images_path):
+        os.makedirs(images_path)
     path = os.path.join(IMAGES_PATH, fig_id + "." + fig_extension)
     print("Saving figure", fig_id)
     if tight_layout:
@@ -49,12 +50,14 @@ mpl.rc('axes', labelsize=14)
 mpl.rc('xtick', labelsize=12)
 mpl.rc('ytick', labelsize=12)
 
+
+
 ########## Download the data ##########
-def fetch_data(data_url=DATA_URL, dataset_path=DATASET_PATH):
+def fetch_data(data_url=DOWNLOAD_ADDRESS + DATA_FILENAME, dataset_path=DATASET_PATH):
     if not os.path.isdir(dataset_path):
         os.makedirs(dataset_path)
     # extract the tarball
-    tgz_path = os.path.join(dataset_path, "housing.tgz")
+    tgz_path = os.path.join(dataset_path, DATA_FILENAME)
     urllib.request.urlretrieve(data_url, tgz_path)
     data_tgz = tarfile.open(tgz_path)
     data_tgz.extractall(path=dataset_path)

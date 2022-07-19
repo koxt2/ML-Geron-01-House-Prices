@@ -33,7 +33,8 @@ IMAGES_PATH = os.path.join(PROJECT_ROOT_DIR, "images")
 DATASET_PATH = os.path.join(PROJECT_ROOT_DIR, "data")
 
 DOWNLOAD_ADDRESS = "https://raw.githubusercontent.com/ageron/handson-ml2/master/datasets/housing/"
-DATA_FILENAME = "housing.tgz"
+DOWNLOAD_FILENAME = "housing.tgz"
+DATA_FILENAME = "housing.csv"
 
 # Where to save the figures 
 def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300, images_path=IMAGES_PATH):
@@ -51,13 +52,12 @@ mpl.rc('xtick', labelsize=12)
 mpl.rc('ytick', labelsize=12)
 
 
-
 ########## Download the data ##########
-def fetch_data(data_url=DOWNLOAD_ADDRESS + DATA_FILENAME, dataset_path=DATASET_PATH):
+def fetch_data(data_url=DOWNLOAD_ADDRESS + DOWNLOAD_FILENAME, dataset_path=DATASET_PATH):
     if not os.path.isdir(dataset_path):
         os.makedirs(dataset_path)
     # extract the tarball
-    tgz_path = os.path.join(dataset_path, DATA_FILENAME)
+    tgz_path = os.path.join(dataset_path, DOWNLOAD_FILENAME)
     urllib.request.urlretrieve(data_url, tgz_path)
     data_tgz = tarfile.open(tgz_path)
     data_tgz.extractall(path=dataset_path)
@@ -66,8 +66,8 @@ def fetch_data(data_url=DOWNLOAD_ADDRESS + DATA_FILENAME, dataset_path=DATASET_P
 fetch_data()
 
 ########## Load the data ##########
-def load_data(dataset_path=DATASET_PATH):
-    csv_path = os.path.join(dataset_path, "housing.csv")
+def load_data(dataset_path=DATASET_PATH, data_filename=DATA_FILENAME):
+    csv_path = os.path.join(dataset_path, data_filename)
     return pd.read_csv(csv_path)
 
 housing = load_data() 

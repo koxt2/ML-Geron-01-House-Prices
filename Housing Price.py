@@ -24,19 +24,19 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import GridSearchCV
 import time
 
+########## Setup ##########
 start_time = time.time()
 
-########## To plot figures ##########
-mpl.rc('axes', labelsize=14)
-mpl.rc('xtick', labelsize=12)
-mpl.rc('ytick', labelsize=12)
-
-########## Where to save the figures ##########
 PROJECT_ROOT_DIR = ""
 CHAPTER_ID = "housing_price_model"
 IMAGES_PATH = os.path.join(PROJECT_ROOT_DIR, "images")
 os.makedirs(IMAGES_PATH, exist_ok=True)
 
+DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
+DATASET_PATH = PROJECT_ROOT_DIR + "dataset"
+DATA_URL = DOWNLOAD_ROOT + "datasets/housing/housing.tgz"
+
+# Where to save the figures 
 def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
     path = os.path.join(IMAGES_PATH, fig_id + "." + fig_extension)
     print("Saving figure", fig_id)
@@ -44,29 +44,32 @@ def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
         plt.tight_layout()
     plt.savefig(path, format=fig_extension, dpi=resolution)
 
-########## Import the house price data ##########
-DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
-HOUSING_PATH = PROJECT_ROOT_DIR + "dataset"
-HOUSING_URL = DOWNLOAD_ROOT + "datasets/housing/housing.tgz"
+# To plot figures 
+mpl.rc('axes', labelsize=14)
+mpl.rc('xtick', labelsize=12)
+mpl.rc('ytick', labelsize=12)
 
-def fetch_housing_data(housing_url=HOUSING_URL, housing_path=HOUSING_PATH):
-    if not os.path.isdir(housing_path):
-        os.makedirs(housing_path)
-    tgz_path = os.path.join(housing_path, "housing.tgz")
-    urllib.request.urlretrieve(housing_url, tgz_path)
-    housing_tgz = tarfile.open(tgz_path)
-    housing_tgz.extractall(path=housing_path)
-    housing_tgz.close()
+########## Download the data ##########
+def fetch_data(data_url=DATA_URL, dataset_path=DATASET_PATH):
+    if not os.path.isdir(dataset_path):
+        os.makedirs(dataset_path)
+    # extract the tarball
+    tgz_path = os.path.join(dataset_path, "housing.tgz")
+    urllib.request.urlretrieve(data_url, tgz_path)
+    data_tgz = tarfile.open(tgz_path)
+    data_tgz.extractall(path=dataset_path)
+    data_tgz.close()
+
+fetch_data()
 
 ########## Load the data ##########
-def load_housing_data(housing_path=HOUSING_PATH):
-    csv_path = os.path.join(housing_path, "housing.csv")
+def load_data(dataset_path=DATASET_PATH):
+    csv_path = os.path.join(dataset_path, "housing.csv")
     return pd.read_csv(csv_path)
 
-fetch_housing_data()
+housing = load_data() 
 
 ########## Summarise/analyse the data ##########
-housing = load_housing_data() 
 print("""
 
 Housing Data""")

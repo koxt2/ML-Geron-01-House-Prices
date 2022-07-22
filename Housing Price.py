@@ -22,6 +22,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import GridSearchCV
+from scipy import stats
 import time
 
 ########## Setup ##########
@@ -281,91 +282,91 @@ full_pipeline = ColumnTransformer([
 housing_prepared = full_pipeline.fit_transform(housing) # Apply transformations
 
 ########## LINEAR REGRESSION ##########   
-print("""
-
-
-**********     Linear Regression     **********""")
-
-lin_reg = LinearRegression()
-lin_reg.fit(housing_prepared, housing_labels) # Train the algorithm using LR on the transformed data and check against the labels
-
-# Try the trained algorithm out on 5 instances
-some_data = housing.iloc[:5]
-some_labels = housing_labels.iloc[:5]
-some_data_prepared = full_pipeline.transform(some_data)
-print("""
-
-
-**********     Linear Regression (test on 5 intances)     **********""")
-print("Predictions:", lin_reg.predict(some_data_prepared))
-print("Labels:", list(some_labels))
-# It is quite inaccurate
-
-# Test the model against the whole train sample 
-housing_predictions = lin_reg.predict(housing_prepared) # Run LR model on the transformed training data
-lin_mse = mean_squared_error(housing_labels, housing_predictions) # Calculate the MSE
-lin_rmse = np.sqrt(lin_mse) # Calculate the RMSE
-print("""
-
-Testing the Linear Regression model on the whole training sample
-Linear Regression RMSE = $""",lin_rmse) # This is the +/- result in $
-# This is a typical underfit. Either choose more powerful model, train algorithm with better features or reduce constraints. 
-
-# mean absolute error
-# lin_mae = mean_absolute_error(housing_labels, housing_predictions)
-# print("Lin_MAE", lin_mae)
-
-# Tune using cross validation 
-# K-fold cross-validation... Randomly split the train data into 10 folds. It will train and evaluate 10 times - using a different fold each time.
-# Result is an array of 10 evaluation scores. 
 def display_scores(scores):
     print("Scores:", scores) # Results of the predictions made using cross-validation
     print("Mean:", scores.mean()) # Mean of these predictions
     print("Standard deviation:", scores.std()) # Standard deviation of the scores
-
-lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels, # Perform cross-validation evaluation using MSE and 10 folds
-                             scoring="neg_mean_squared_error", cv=10)
-lin_rmse_scores = np.sqrt(-lin_scores) # RMSE of the predictions
-print("""
-
-Results of cross-validation evaluation for Linear Regression""")
-(display_scores(lin_rmse_scores))
-
-########## DECISION TREE REGRESSOR ##########
-print("""
-
-
-**********     Decision Tree Regression     **********""")
-tree_reg = DecisionTreeRegressor(random_state=42)
-#tree_reg = DecisionTreeRegressor()
-tree_reg.fit(housing_prepared, housing_labels) # Train the algorithm using DTR on the transformed data and check against the labels
-
-housing_predictions = tree_reg.predict(housing_prepared) # Run DTR model on the transformed training data
-tree_mse = mean_squared_error(housing_labels, housing_predictions) # Calculate the MSE
-tree_rmse = np.sqrt(tree_mse) # Calculate the RMSE
-print("""
-
-Testing the Decision Tree Regression model on the whole training sample
-Decision Tree Regression RMSE= $""", tree_rmse) # This is the +/- result in $
-# Result is $0... an overfit. Not good. 
-
-########## Tune model using cross validation ##########
-
-tree_scores = cross_val_score(tree_reg, housing_prepared, housing_labels, # Perform cross-validation evaluation using MSE and 10 folds
-                         scoring="neg_mean_squared_error", cv=10)
-tree_rmse_scores = np.sqrt(-tree_scores) # RMSE of the predictions
-print("""
-
-Results of cross-validation evaluation for Decision Tree Regression""")
-(display_scores(tree_rmse_scores))
-
-# Worse than the Linear Regression model
-
-########## RANDOM FOREST REGRESSOR ##########
-print("""
-
-
-**********     Random Forest Regressor     **********""")
+#print("""
+#
+#
+#**********     Linear Regression     **********""")
+#
+#lin_reg = LinearRegression()
+#lin_reg.fit(housing_prepared, housing_labels) # Train the algorithm using LR on the transformed data and check against the labels
+#
+## Try the trained algorithm out on 5 instances
+#some_data = housing.iloc[:5]
+#some_labels = housing_labels.iloc[:5]
+#some_data_prepared = full_pipeline.transform(some_data)
+#print("""
+#
+#
+#**********     Linear Regression (test on 5 intances)     **********""")
+#print("Predictions:", lin_reg.predict(some_data_prepared))
+#print("Labels:", list(some_labels))
+## It is quite inaccurate
+#
+## Test the model against the whole train sample 
+#housing_predictions = lin_reg.predict(housing_prepared) # Run LR model on the transformed training data
+#lin_mse = mean_squared_error(housing_labels, housing_predictions) # Calculate the MSE
+#lin_rmse = np.sqrt(lin_mse) # Calculate the RMSE
+#print("""
+#
+#Testing the Linear Regression model on the whole training sample
+#Linear Regression RMSE = $""",lin_rmse) # This is the +/- result in $
+## This is a typical underfit. Either choose more powerful model, train algorithm with better features or reduce constraints. 
+#
+## mean absolute error
+## lin_mae = mean_absolute_error(housing_labels, housing_predictions)
+## print("Lin_MAE", lin_mae)
+#
+## Tune using cross validation 
+## K-fold cross-validation... Randomly split the train data into 10 folds. It will train and evaluate 10 times - using a different fold each time.
+## Result is an array of 10 evaluation scores. 
+#
+#lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels, # Perform cross-validation evaluation using MSE and 10 folds
+#                             scoring="neg_mean_squared_error", cv=10)
+#lin_rmse_scores = np.sqrt(-lin_scores) # RMSE of the predictions
+#print("""
+#
+#Results of cross-validation evaluation for Linear Regression""")
+#(display_scores(lin_rmse_scores))
+#
+########### DECISION TREE REGRESSOR ##########
+#print("""
+#
+#
+#**********     Decision Tree Regression     **********""")
+#tree_reg = DecisionTreeRegressor(random_state=42)
+##tree_reg = DecisionTreeRegressor()
+#tree_reg.fit(housing_prepared, housing_labels) # Train the algorithm using DTR on the transformed data and check against the labels
+#
+#housing_predictions = tree_reg.predict(housing_prepared) # Run DTR model on the transformed training data
+#tree_mse = mean_squared_error(housing_labels, housing_predictions) # Calculate the MSE
+#tree_rmse = np.sqrt(tree_mse) # Calculate the RMSE
+#print("""
+#
+#Testing the Decision Tree Regression model on the whole training sample
+#Decision Tree Regression RMSE= $""", tree_rmse) # This is the +/- result in $
+## Result is $0... an overfit. Not good. 
+#
+########### Tune model using cross validation ##########
+#
+#tree_scores = cross_val_score(tree_reg, housing_prepared, housing_labels, # Perform cross-validation evaluation using MSE and 10 folds
+#                         scoring="neg_mean_squared_error", cv=10)
+#tree_rmse_scores = np.sqrt(-tree_scores) # RMSE of the predictions
+#print("""
+#
+#Results of cross-validation evaluation for Decision Tree Regression""")
+#(display_scores(tree_rmse_scores))
+#
+## Worse than the Linear Regression model
+#
+########### RANDOM FOREST REGRESSOR ##########
+#print("""
+#
+#
+#**********     Random Forest Regressor     **********""")
 forest_reg = RandomForestRegressor(n_estimators=100, random_state=42)
 forest_reg.fit(housing_prepared, housing_labels) # Train the algorithm using RFR on the transformed data and check against the labels
 
@@ -430,6 +431,13 @@ final_rmse = np.sqrt(final_mse)
 print("""
 
 Final Random Tree Regressor RMSE = """, final_rmse) # Calculate the RMSE of the predictions
+
+confidence = 0.95
+squared_errors = (final_predictions - y_test) ** 2
+print("95% confidence interval...",
+np.sqrt(stats.t.interval(confidence, len(squared_errors) - 1,
+                          loc=squared_errors.mean(),
+                          scale=stats.sem(squared_errors))))
 
 print ("My program took", time.time() - start_time, "to run")
  
